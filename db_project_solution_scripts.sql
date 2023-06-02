@@ -1,3 +1,5 @@
+/* Drop tables if exist */
+
 DROP TABLE EC_CUSTOMERS CASCADE CONSTRAINTS;
 DROP TABLE EC_ORDERS CASCADE CONSTRAINTS;
 DROP TABLE EC_PAYMENTS CASCADE CONSTRAINTS;
@@ -17,7 +19,10 @@ DROP SEQUENCE ec_products_product_id_seq;
 DROP SEQUENCE payment_log_seq;
 
 
+/* Start creation of tables ------------------- */
 
+
+--- Create EC_CUSTOMERS table 
 CREATE TABLE EC_CUSTOMERS
 (
 customer_ID NUMBER(4),
@@ -30,12 +35,16 @@ phone_number NUMBER(15),
 CONSTRAINT ec_customers_customer_ID_pk PRIMARY KEY(customer_ID)
 );
 
+--- Create SEQUENCE for EC_CUSTOMERS table
 Create sequence ec_customers_customer_id_seq
 start with 10;
 
+--- Create INDEX for EC_CUSTOMERS table
 CREATE INDEX ec_customers_FName_LName_idx
 ON ec_customers(FirstName, LastName);
 
+
+--- Insert multiple rows of data into customers table
 insert into EC_CUSTOMERS
 (customer_ID, FirstName, LastName, billing_address, shipping_address, email, phone_number)
 values(ec_customers_customer_id_seq.NEXTVAL, 'Evlyn', 'Frank', '15 Welligton street N, Hamilton, ON', '25 Brent stree E, Burlington, ON', 'evlyn.frank@gmail.com', 2985645031);
@@ -77,6 +86,7 @@ insert into EC_CUSTOMERS
 values(ec_customers_customer_id_seq.NEXTVAL, 'Rose', 'Ben', '342 Dunda street, Toronto, ON', null, 'rose.ben@gmail.com', 2856563617);
 
 
+--- Create EC_ORDERS table with ORGANIZATION INDEX
 CREATE TABLE EC_ORDERS
 (
 order_ID NUMBER(4),
@@ -90,11 +100,13 @@ CONSTRAINT ec_orders_customer_ID_fk FOREIGN KEY (customer_ID)
 )
 ORGANIZATION INDEX;
 
+--- Create SEQUENCE for EC_ORDERS table
 Create sequence ec_orders_order_id_seq
 increment by 10  
 start with 100;
 
 
+--- Insert multiple rows of data into orders table
 insert into EC_ORDERS
 (order_ID, customer_ID, order_date, order_qty, order_amount)
 values(ec_orders_order_id_seq.NEXTVAL, 11, '21-JUN-21', 3, 790);
@@ -136,6 +148,7 @@ insert into EC_ORDERS
 values(ec_orders_order_id_seq.NEXTVAL, 17, '22-MAY-21', 1, 450);
 
 
+--- Create EC_PAYMENTS table
 CREATE TABLE EC_PAYMENTS
 (
 payment_ID NUMBER(4),
@@ -151,6 +164,8 @@ CONSTRAINT ec_payments_order_ID_fk FOREIGN KEY (order_ID)
     REFERENCES ec_ORDERS(order_ID)
 );
 
+
+--- Insert multiple rows of data into EC_PAYMENTS table
 insert into EC_PAYMENTS
 (payment_ID, customer_ID, order_ID, amount, payment_method, payment_date)
 values(101, 14, 170, 110, 'transfer', '02-NOV-21');
@@ -192,6 +207,7 @@ insert into EC_PAYMENTS
 values(551, 15, 180, 1060, 'debit card', '18-AUG-21');
 
 
+---  Create EC_SHIPPING table
 CREATE TABLE EC_SHIPPING
 (
 tracking_ID NUMBER(10),
@@ -205,10 +221,12 @@ CONSTRAINT ec_shipping_order_ID_fk FOREIGN KEY (order_ID)
     REFERENCES ec_ORDERS(order_ID)
 );
 
+--- Create SEQUENCE for EC_SHIPPING table
 Create sequence ec_shipping_tracking_ID_seq
 increment by 2  
 start with 100000;
 
+--- Insert multiple rows of data into EC_SHIPPING table
 insert into EC_SHIPPING
 (tracking_ID, order_ID, ship_date, delivered_date, delivery_status, delivery_address)
 values(ec_shipping_tracking_ID_seq.NEXTVAL, 190, '23-MAY-21', '26-MAY-21', 'delivered', '332 Wiston Churchill rd, Missisauga, ON');
@@ -250,7 +268,7 @@ insert into EC_SHIPPING
 values(ec_shipping_tracking_ID_seq.NEXTVAL, 140, '10-OCT_21', '13-OCT-21', 'delivered', '25 Brent stree E, Burlington, ON');
 
 
-
+--- Create EC_CATEGORIES table
 CREATE TABLE EC_CATEGORIES
 (
 category_ID NUMBER(5),
@@ -258,10 +276,12 @@ category_name VARCHAR2(30) NOT NULL,
 CONSTRAINT ec_categories_category_ID_pk PRIMARY KEY(category_ID)
 );
 
+--- Create SEQUENCE for EC_CATEGORIES table
 Create sequence ec_categories_category_ID_seq
 increment by 25  
 start with 250;
 
+--- Insert multiple rows of data into EC_CATEGORIES table
 insert into EC_CATEGORIES
 (category_ID, category_name)
 values(ec_categories_category_ID_seq.NEXTVAL, 'Toys and Games');
@@ -303,7 +323,7 @@ insert into EC_CATEGORIES
 values(ec_categories_category_ID_seq.NEXTVAL, 'Office accessories');
 
 
-
+--- Create EC_PRODUCTS table
 CREATE TABLE EC_PRODUCTS
 (
 product_ID NUMBER(4),
@@ -315,14 +335,16 @@ CONSTRAINT ec_products_product_ID_pk PRIMARY KEY(product_ID),
 CONSTRAINT ec_products_category_ID_fk FOREIGN KEY (category_ID) REFERENCES ec_CATEGORIES(category_ID)
 );
 
+--- Create SEQUENCE for EC_PRODUCTS table
 Create sequence ec_products_product_id_seq
 increment by 5  
 start with 50;
 
+--- Create BITMAP INDEX type for EC_PRODUCTS table
 CREATE BITMAP INDEX ec_products_product_name_idx
 ON ec_products(product_name);
 
-
+--- Insert multiple rows of data into EC_PRODUCTS table
 insert into EC_PRODUCTS
 (product_ID, product_name, price, quantity, category_ID)
 values(ec_products_product_id_seq.NEXTVAL, 'stapler', 15, 14, 475);
@@ -376,7 +398,7 @@ insert into EC_PRODUCTS
 values(ec_products_product_id_seq.NEXTVAL, 'Samsung Phone Battery', 160, 3, 350);
 
 
-
+--- Create EC_SELLER table
 CREATE TABLE EC_SELLER
 (
 seller_ID NUMBER(4),
@@ -386,6 +408,7 @@ seller_phone# NUMBER(15),
 CONSTRAINT ec_seller_seller_ID_pk PRIMARY KEY(seller_ID)
 );
 
+--- Insert multiple rows of data into EC_SELLER
 insert into EC_SELLER
 (seller_ID, seller_name, seller_address, seller_phone#)
 values(501, 'A-Z Salez', NULL, 4568597412);
@@ -426,6 +449,8 @@ insert into EC_SELLER
 (seller_ID, seller_name, seller_address, seller_phone#)
 values(510, 'EazyComm shop', NULL, 6258964523);
 
+
+--- Create EC_PRODUCT_SELLER table
 CREATE TABLE EC_PRODUCT_SELLER
 (
 Prod_Seller_ID NUMBER(4),
@@ -436,6 +461,7 @@ CONSTRAINT ec_ProdSeller_product_ID_fk FOREIGN KEY (product_ID) REFERENCES ec_PR
 CONSTRAINT ec_ProdSeller_seller_ID_fk FOREIGN KEY (seller_ID) REFERENCES ec_SELLER(seller_ID)
 );
 
+--- Insert multiple rows of data inot EC_PRODUCT_SELLER table
 insert into EC_PRODUCT_SELLER
 (Prod_Seller_ID, product_ID, seller_ID)
 values(701, 80, 501);
@@ -517,7 +543,7 @@ insert into EC_PRODUCT_SELLER
 values(720, 85, 510);
 
 
-
+--- Create EC_ORDER_DETAILS table
 CREATE TABLE EC_ORDER_DETAILS
 (
 order_details_ID NUMBER(4),
@@ -533,10 +559,11 @@ CONSTRAINT ec_OrderDet_prod_seller_id_fk FOREIGN KEY (prod_seller_id) REFERENCES
 CONSTRAINT ec_OrderDet_qty_ordered_ck CHECK (product_qty > 0)
 );
 
+--- Create index on EC_ORDER_DETAILS table
 CREATE INDEX ec_order_det_orderID_idx
 ON EC_ORDER_DETAILS(order_ID);
 
-
+--- Insert multiple rows of data into EC_ORDER_DETAILS table
 insert into EC_ORDER_DETAILS
 (order_details_ID, order_ID, product_ID, prod_seller_id, product_qty, amount)
 values(5, 100, 100, 712, 1, 780);
@@ -616,7 +643,7 @@ values(80, 190, 105, 713, 1, 450);
 
 
 
-
+--- Create ec_payments_log table
 CREATE TABLE ec_payments_log (
   log_id NUMBER(4),
   payment_id NUMBER(4),
@@ -626,6 +653,7 @@ CREATE TABLE ec_payments_log (
 CONSTRAINT ec_payment_log_Log_ID_pk PRIMARY KEY(log_id),
 CONSTRAINT ec_PaymentLog_payment_ID_fk FOREIGN KEY (payment_id) REFERENCES ec_PAYMENTS(payment_id));
 
+--- Create SEQUENCE on ec_payments_log table
 create sequence payment_log_seq
 increment by 1
 start with 1;
@@ -650,7 +678,7 @@ SELECT * FROM ec_payments_log;
 SELECT table_name, index_name, column_name
 FROM user_ind_columns
 where table_name in ('EC_CUSTOMERS', 'EC_ORDERS', 'EC_PRODUCTS', 'EC_ORDER_DETAILS', 'ec_payments_log'); 
-----EC_ORDERS table is create as an Index Organized Table(IOT)
+----EC_ORDERS table is created as an Index Organized Table(IOT)
 --------------------------------------------------------------------------------------------------------
 
 ---TEST Sequence Creation
@@ -668,7 +696,10 @@ insert into EC_CATEGORIES
 (category_ID, category_name)
 values(ec_categories_category_ID_seq.NEXTVAL, 'Fashion');
 ---------------------------------------------------------------------------------
----Use SEQUENCES to update table(s)
+
+/* PL/SQL */
+
+---Use SEQUENCES to update table(s) - Implement using PL/SQL Procedure
 create or replace procedure Update_Customer_Info
 (lv_ship_address IN EC_CUSTOMERS.shipping_address%TYPE)
 AS
